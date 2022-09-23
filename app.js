@@ -25,12 +25,18 @@ app.get("/api/v1/tours/:id", (req, res) => {
 
   const tour = tours.find((tour) => id == tour.id);
 
-  res.status(200).json({
-    status :'success',
-    data :{
-      tour
-    }
-  })
+  if(!tour){
+    return res.status(404).json({message : 'this doesnt exist'})
+  }else{
+    res.status(200).json({
+      status: "success",
+      data: {
+        tour,
+      },
+    });
+  }
+
+ 
 });
 
 app.listen(3001, () => {
