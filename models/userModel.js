@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "User must have a password"],
     minlength: 8,
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -29,21 +30,28 @@ const userSchema = new mongoose.Schema({
       validator: function (el) {
         return el == this.password;
       },
-      message :"passwords are not the same!"
+      message: "passwords are not the same!",
     },
   },
 });
 
-userSchema.pre('save', async function(next){
-    //only run this function if password was modified
-    if(!this.isModified('password'))
-     return next() 
-    //hash the password
-    this.password = await bcrypt.hash(this.password,12)
-    // delete the passwordConfirm field 
-    this.passwordConfirm = undefined
-    next()
-})
+userSchema.pre("save", async function (next) {
+  //only run this function if password was modified
+  if (!this.isModified("password")) return next();
+  //hash the password
+  this.password = await bcrypt.hash(this.password, 12);
+  // delete the passwordConfirm field
+  this.passwordConfirm = undefined;
+  next();
+});
+
+//instance method.a method available to all documents of a certaain collection
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 const User = mongoose.model("User", userSchema);
 
